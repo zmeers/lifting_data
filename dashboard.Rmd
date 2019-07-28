@@ -1,0 +1,243 @@
+---
+title: "Lifting and training data analysis"
+author: "Zoe Meers"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(here)
+library(tidyverse)
+```
+
+Lifts
+===================================== 
+
+
+Column {data-width=250}
+-----------------------------------------------------------------------
+#### Bench, Squat, Deadlift
+
+* Data to come ... (It takes a while to transcribe from my notebook). Goes back to ~2016-ish.
+
+
+#### July 2019, hypertrophy
+
+Training program:
+
+Day 1:
+
+* Low bar back squat (6x4)
+* Conventional rack pulls (10x4)
+* Leg press (15-20x4)
+* Barbell front foot elevated front squat (10x4)
+* Back extension (20x4)
+
+Day 2:
+
+* Barbell bench press (6x4)
+* Wide grip pull ups (10x4)
+* Single standing dumbell press (15-20x4)
+* Single dumbell row (10x4)
+* Bent over dumbell lateral raise (20x4)
+
+Day 3:
+
+* Conventional deadlift (6x4)
+* Goblet squats (10x4)
+* Single leg curl (15-20x4)
+* Dumbell romanian deadlift (10x4)
+* Dumbell walking lunge (15x4)
+
+Day 4 (optional):
+
+
+#### August 2019, hypertrophy
+
+Training program:
+
+Day 1:
+
+* Low bar back squat (6x4)
+* Conventional rack pulls (10x4)
+* Leg press (15-20x4)
+* Barbell front foot elevated front squat (10x4)
+* Back extension (20x4)
+
+Day 2:
+
+* Barbell bench press (6x4)
+* Wide grip pull ups (10x4)
+* Single standing dumbell press (15-20x4)
+* Single dumbell row (10x4)
+* Bent over dumbell lateral raise (20x4)
+
+Day 3:
+
+* Conventional deadlift (6x4)
+* Goblet squats (10x4)
+* Single leg curl (15-20x4)
+* Dumbell romanian deadlift (10x4)
+* Dumbell walking lunge (15x4)
+
+Day 4 (optional):
+
+
+Column {data-width=450}
+-----------------------------------------------------------------------
+#### Bench, Squat, Deadlift
+
+```{r}
+ggplot()
+```
+
+#### July 2019 data and graphs
+
+```{r}
+lifts_july <- read_csv(here("data/lifts_july_19_hypertrophy.csv")) %>% 
+  drop_na(date) %>% 
+  filter(lift %in% c("low bar back squat",
+                     "conventional deadlift",
+                     "barbell bench press")) %>% 
+  mutate(lift = str_to_sentence(lift))
+
+ggplot(lifts_july, aes(lift, weight)) + 
+  geom_bar(stat = 'identity', color = "black", fill = ussc::ussc_colours("light blue")) + 
+  # coord_flip() + 
+  theme_minimal() + 
+  labs(y = "Weight (KG)",
+       x = "Lift",
+       title = "Week of July 22-28, 2019",
+       subtitle = "Note: when I get enough data transcribed, this will turn into a line chart so you can track increases (or declines) over time.s")
+
+
+```
+
+#### August 2019 data and graphs
+
+```{r}
+ggplot()
+```
+
+
+Weight
+===================================== 
+
+### Weight, daily
+
+```{r}
+weight <- read_csv(here("data/weight_tracking.csv")) %>% 
+    mutate(date = as.Date(date, "%d/%m/%y"),
+           kilograms = as.numeric(kilograms)) %>% 
+    mutate(kilograms = round(kilograms, 1))
+
+ggplot(weight, aes(date, kilograms)) +
+    geom_point() +
+    geom_line() + 
+    ylim(55,75) +
+    labs(x = NULL, 
+         y = "KG",
+         subtitle = "Note: height = 5'3'' or 164cm") +
+  #  scale_y_continuous(breaks = c(56,58,60,62,64,66,68,70,72,74))+
+    theme_minimal()
+
+
+```
+
+
+Food Tracking
+===================================== 
+
+
+Column {data-width=450}
+-----------------------------------------------------------------------
+
+
+#### Daily tracking of macronutrients
+```{r, fig.height = 4}
+food <- read_csv(here("data/food_tracking.csv")) %>% 
+    mutate(date = as.Date(date, "%d/%m/%y"))
+
+meals <- food %>% 
+    filter(meal!="total") %>% 
+    group_by(date, meal, macronutrients) %>% 
+    tally(grams) %>% 
+    ungroup() %>% 
+    drop_na(macronutrients) %>% 
+    mutate(macronutrients = as.factor(macronutrients))
+
+
+daily <- food %>% 
+    filter(meal!="total") %>% 
+    group_by(date, macronutrients) %>% 
+    tally(grams) %>% 
+    ungroup() %>% 
+    drop_na(macronutrients) %>% 
+    mutate(label = if_else(date == max(date), paste0(macronutrients,": ", round(n,1),"g"), NA_character_)) 
+
+ggplot(daily, aes(date, n, color = macronutrients, group = macronutrients)) +
+    geom_line(show.legend = F) +
+    geom_point(show.legend = F) + 
+    ussc::scale_colour_ussc() +
+    ggrepel::geom_label_repel(aes(label=label),  nudge_x = 30, nudge_y = 10, alpha = 0.7, show.legend = F) +
+    theme_minimal() + 
+    ylim(0, 200) +
+    # scale_y_continuous(breaks = scales::pretty_breaks(10)) +
+    labs(y = "grams",
+         x = NULL, 
+         color = NULL)
+
+    
+```
+
+#### Total calories consumed, daily
+
+```{r,  fig.height = 4}
+cals <- food %>% 
+    filter(meal!="total") %>% 
+    select(date, calories) %>% 
+    distinct() %>% 
+    drop_na() %>% 
+    group_by(date) %>% 
+    tally(calories) %>% 
+    ungroup()
+
+ggplot(cals, aes(x = date, y = n)) + 
+    geom_point() +
+    geom_line() + 
+    theme_minimal() + 
+    ylim(1000, 2000) +
+    labs(x = NULL,
+         y = "Daily caloric consumption")
+```
+
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+#### Macronutrient breakdown, weekly average
+
+```{r, fig.height = 4}
+ggplot(meals %>% group_by(meal, macronutrients) %>% 
+           summarise(mean_n = mean(n)), aes(meal, mean_n, fill = macronutrients)) +
+    geom_bar(stat = 'identity', show.legend = FALSE) + 
+    theme_minimal() + 
+    ussc::scale_fill_ussc() +
+    labs(y = "grams")
+```
+
+#### Macronutrient breakdown per meal, daily
+
+```{r, fig.height = 4}
+ggplot(meals, aes(meal, n, fill = macronutrients)) +
+    geom_bar(stat = 'identity', show.legend = FALSE) + 
+    facet_wrap(~date) + 
+    theme_minimal() + 
+    ussc::scale_fill_ussc()+
+    coord_flip()+ 
+    labs(y = "grams")
+```
+
