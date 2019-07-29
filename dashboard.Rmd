@@ -111,7 +111,7 @@ ggplot(lifts_july, aes(lift, weight)) +
   labs(y = "Weight (KG)",
        x = "Lift",
        title = "Week of July 22-28, 2019",
-       subtitle = "Note: when I get enough data transcribed, this will turn into a line chart so you can track increases (or declines) over time.s")
+       subtitle = "Note: when I get enough data transcribed, this will turn into a line chart so you\ncan track increases (or declines) over time.")
 
 
 ```
@@ -130,6 +130,7 @@ Weight
 
 ```{r}
 weight <- read_csv(here("data/weight_tracking.csv")) %>% 
+   separate("date,kilograms", c("date", "kilograms"), sep = ",") %>% 
     mutate(date = as.Date(date, "%d/%m/%y"),
            kilograms = as.numeric(kilograms)) %>% 
     mutate(kilograms = round(kilograms, 1))
