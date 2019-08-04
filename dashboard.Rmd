@@ -177,7 +177,7 @@ daily <- food %>%
     tally(grams) %>% 
     ungroup() %>% 
     drop_na(macronutrients) %>% 
-    mutate(label = if_else(date == max(date), paste0(macronutrients,": ", round(n,1),"g"), NA_character_)) 
+    mutate(label = if_else(date == max(date), paste0(macronutrients,": ", round(n,1),"g"), NA_character_))
 
 ggplot(daily, aes(date, n, color = macronutrients, group = macronutrients)) +
     geom_line(show.legend = F) +
