@@ -185,7 +185,7 @@ ggplot(daily, aes(date, n, color = macronutrients, group = macronutrients)) +
     ussc::scale_colour_ussc() +
     ggrepel::geom_label_repel(aes(label=label),  nudge_x = 30, nudge_y = 10, alpha = 0.7, show.legend = F) +
     theme_minimal() + 
-    ylim(0, 200) +
+    # ylim(0, 200) +
     # scale_y_continuous(breaks = scales::pretty_breaks(10)) +
     labs(y = "grams",
          x = NULL, 
