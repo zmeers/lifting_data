@@ -210,7 +210,7 @@ ggplot(cals, aes(x = date, y = n)) +
     geom_point() +
     geom_line() + 
     theme_minimal() + 
-    ylim(1000, 2000) +
+    ylim(1000, 2500) +
     labs(x = NULL,
          y = "Daily caloric consumption")
 ```
